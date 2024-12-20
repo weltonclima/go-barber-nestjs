@@ -1,53 +1,52 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateLoginDto } from './dto/create-login.dto';
 import { LoginDto } from './dto/login.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Login } from './schemas/login.schema';
-import mongoose, { Model } from 'mongoose';
-import { LoginEntity } from './entities/login.entity';
-import { hashSync, compareSync, genSalt, genSaltSync } from 'bcryptjs';
-import { JwtService } from '@nestjs/jwt';
+import { Model } from 'mongoose';
+import { compareSync } from 'bcryptjs';
 import { AuthService } from 'src/guard/auth.service';
-import { UpdateLoginDto } from './dto/update-login.dto';
 import { ForgetPasswordDto } from './dto/forget-password.dto';
+import { User } from './schemas/user.schema';
+import { CreateUserDto } from './dto/create.dto';
+import { UserEntity } from './entities/user.entity';
+import { UpdateUserDto } from './dto/update.dto';
 
 @Injectable()
-export class LoginService {
+export class UserService {
   constructor(
-    @InjectModel(Login.name) private mongoose: Model<Login>,
+    @InjectModel(User.name) private mongoose: Model<User>,
     private readonly authService: AuthService,
   ) { }
 
-  async create(createLoginDto: CreateLoginDto) {
+  async create(createUserDto: CreateUserDto) {
 
-    const findUser = await this.mongoose.findOne({ email: createLoginDto.email });
+    const findUser = await this.mongoose.findOne({ email: createUserDto.email });
     if (!!findUser)
       throw new BadRequestException('User already exists');
 
-    const entity = new LoginEntity().create(createLoginDto).hashPassword();
+    const entity = new UserEntity().create(createUserDto).hashPassword();
     const model = await this.mongoose.create(entity);
     const doc = await model.save();
 
     return entity.MapToEntity(doc);
   }
 
-  async update(updateDto: UpdateLoginDto) {
-    const login = await this.mongoose.findById(updateDto.id);
-    if (!login)
+  async update(updateUserDto: UpdateUserDto) {
+    const user = await this.mongoose.findById(updateUserDto.id);
+    if (!user)
       throw new NotFoundException("User not found");
 
-    const findByEmail = await this.mongoose.findOne({ email: updateDto.email });
-    if (!!findByEmail && findByEmail.id != login.id)
+    const findByEmail = await this.mongoose.findOne({ email: updateUserDto.email });
+    if (!!findByEmail && findByEmail.id != user.id)
       throw new BadRequestException("Email already exists");
 
-    const findPassword = compareSync(updateDto.password, login.password);
+    const findPassword = compareSync(updateUserDto.password, user.password);
     if (!findPassword)
       throw new BadRequestException("Password is incorrect");
 
-    const entity = new LoginEntity();
+    const entity = new UserEntity();
 
     await this.mongoose.findOneAndUpdate(
-      { _id: login.id }, { ...entity.update(updateDto).hashPassword() }, { new: true }
+      { _id: user.id }, { ...entity.update(updateUserDto).hashPassword() }, { new: true }
     )
 
     return entity.passwordIsNull();
@@ -76,7 +75,7 @@ export class LoginService {
     if (!findPassword)
       throw new BadRequestException("Password is incorrect");
 
-    const entity = new LoginEntity(findUser);
+    const entity = new UserEntity(findUser);
 
     await this.mongoose.findOneAndUpdate(
       { _id: findUser.id },

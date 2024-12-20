@@ -1,22 +1,22 @@
 import { genSaltSync, hashSync } from "bcryptjs";
-import { CreateLoginDto } from "../dto/create-login.dto";
-import { LoginDocument } from "../schemas/login.schema";
-import { UpdateLoginDto } from "../dto/update-login.dto";
+import { UpdateUserDto } from "../dto/update.dto";
+import { CreateUserDto } from "../dto/create.dto";
+import { UserDocument } from "../schemas/user.schema";
 
-export type LoginType = {
+export type UserType = {
   id: number;
   name: string;
   email: string;
   password: string;
 }
 
-export class LoginEntity {
+export class UserEntity {
   private id: number;
   private name: string;
   private email: string;
   private password: string | null;
 
-  constructor(entity: LoginType | LoginDocument = {} as LoginType | LoginDocument) {
+  constructor(entity: UserType | UserDocument = {} as UserType | UserDocument) {
     this.Id = entity.id;
     this.Name = entity.name;
     this.Email = entity.email;
@@ -33,11 +33,11 @@ export class LoginEntity {
   private set Email(value: string) { this.email = value }
   private set Password(value: string | null) { this.password = value }
 
-  MapToEntity(login: LoginDocument) {
-    this.Id = login.id;
-    this.Name = login.name;
-    this.Email = login.email;
-    this.Password = login.password;
+  MapToEntity(user: UserDocument) {
+    this.Id = user.id;
+    this.Name = user.name;
+    this.Email = user.email;
+    this.Password = user.password;
 
     return this;
   }
@@ -48,10 +48,10 @@ export class LoginEntity {
       name: this.Name,
       email: this.Email,
       password: this.Password,
-    } as LoginType
+    } as UserType
   }
 
-  create(user: CreateLoginDto) {
+  create(user: CreateUserDto) {
     this.Name = user.name;
     this.Email = user.email;
     this.Password = user.password;
@@ -59,7 +59,7 @@ export class LoginEntity {
   }
 
 
-  update(user: UpdateLoginDto) {
+  update(user: UpdateUserDto) {
     this.Name = user.name;
     this.Email = user.email;
     this.Password = user["password-old"];

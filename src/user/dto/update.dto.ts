@@ -1,7 +1,6 @@
 import { IsEmail, IsMongoId, IsString, ValidateIf } from "class-validator";
-import { CreateLoginDto } from "./create-login.dto";
 
-export class UpdateLoginDto {
+export class UpdateUserDto {
   @IsMongoId()
   id: string;
 
