@@ -58,7 +58,7 @@ export class HairdressersService {
     if (!find)
       throw new NotFoundException("Hairdresser not found");
 
-    const file = createReadStream(`${process.env.UPLOAD_FOLDER_PATH}/${find.image.filename}`);
+    const file = createReadStream(`${process.env.UPLOAD_FOLDER_PATH}/hairdressers/${find.image.filename}`);
     const stream = new StreamableFile(file, {
       type: find.image.mimetype
     });

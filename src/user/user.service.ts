@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { compareSync } from 'bcryptjs';
 import { AuthService } from 'src/guard/auth.service';
 import { ForgetPasswordDto } from './dto/forget-password.dto';
@@ -9,6 +9,8 @@ import { User } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create.dto';
 import { UserEntity } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update.dto';
+import { UploadDto } from './dto/upload.dto';
+import { createReadStream } from 'fs';
 
 @Injectable()
 export class UserService {
@@ -50,6 +52,52 @@ export class UserService {
     )
 
     return entity.passwordIsNull();
+  }
+
+  async upload({ id }: UploadDto, file: Express.Multer.File) {
+    const find = await this.mongoose.findById(id);
+    if (!find)
+      throw new NotFoundException("User not found");
+
+    const entity = new UserEntity(find);
+
+    await this.mongoose.findOneAndUpdate(
+      { _id: id },
+      { ...entity.upload(file) },
+      { new: true }
+    )
+
+    return entity;
+  }
+
+  async download(id: ObjectId) {
+    const find = await this.mongoose.findById(id);
+    if (!find)
+      throw new NotFoundException("user not found");
+
+    const file = createReadStream(`${process.env.UPLOAD_FOLDER_PATH}/users/${find.image.filename}`);
+    const stream = new StreamableFile(file, {
+      type: find.image.mimetype
+    });
+
+    return stream;
+  }
+
+  async findOne(id: ObjectId) {
+    const findOne = await this.mongoose.findOne({ _id: id });
+    if (!findOne)
+      throw new NotFoundException("User not found");
+
+    return new UserEntity(findOne).passwordIsNull();
+  }
+
+
+  async findAll() {
+    const findAll = await this.mongoose.find();
+    if (!findAll.length)
+    throw new NotFoundException("Hairdressers not found");
+
+    return findAll.map(item => new UserEntity(item).passwordIsNull());
   }
 
   async login({ email, password }: LoginDto) {

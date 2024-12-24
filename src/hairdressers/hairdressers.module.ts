@@ -20,7 +20,7 @@ import { diskStorage } from "multer";
       useFactory: (configService: ConfigService) => {
         return {
           storage: diskStorage({
-            destination: configService.getOrThrow("UPLOAD_FOLDER_PATH"),
+            destination: configService.getOrThrow("UPLOAD_FOLDER_PATH") + "/hairdressers",
             filename(req, file, callback) {
               const originalname = file.originalname.split('.')
               const filename = `${req.body['id']}.${originalname[originalname.length - 1]}`

@@ -86,8 +86,8 @@ export class HairdresserEntity {
       throw new BadRequestException("Weekly cannot be empty");
 
     if (
-      !this.Time?.morning?.length ||
-      !this.Time?.afternoon?.length ||
+      !this.Time?.morning?.length &&
+      !this.Time?.afternoon?.length &&
       !this.Time?.night?.length
     )
       throw new BadRequestException("Time cannot be empty");
