@@ -92,7 +92,7 @@ export class HairdresserEntity {
     )
       throw new BadRequestException("Time cannot be empty");
 
-      return this;
+    return this;
   }
 
   isSuccess() {

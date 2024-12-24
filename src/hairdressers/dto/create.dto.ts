@@ -7,7 +7,7 @@ export class Weekly {
   title: string;
 
   @IsNotEmpty()
-  @IsArray({ each: true })
+  @IsArray()
   days: string[];
 }
 
@@ -17,15 +17,15 @@ export class Time {
   title: string;
 
   @IsNotEmpty()
-  @IsArray({ each: true })
+  @IsArray()
   morning: string[];
 
   @IsNotEmpty()
-  @IsArray({ each: true })
+  @IsArray()
   afternoon: string[];
 
   @IsNotEmpty()
-  @IsArray({ each: true })
+  @IsArray()
   night: string[];
 }
 
